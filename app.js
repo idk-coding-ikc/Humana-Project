@@ -162,6 +162,17 @@ function statusClass(status) {
   }[status];
 }
 
+function statusTextForRole(item) {
+  if (activeRole !== "provider") return item.statusText;
+  return {
+    ready: "In review",
+    missing: "Action needed",
+    human: "Clinical review",
+    sla: "Clinical review",
+    approved: "Approved"
+  }[item.status] || item.statusText;
+}
+
 function filteredCases() {
   if (activeFilter === "all") return cases;
   return cases.filter((item) => item.status === activeFilter || (activeFilter === "human" && item.status === "sla"));
@@ -171,6 +182,8 @@ function renderMetrics() {
   const ready = cases.filter((item) => item.status === "ready").length;
   const missing = cases.filter((item) => item.status === "missing").length;
   const sla = cases.filter((item) => item.sla.includes("46m") || item.status === "sla").length;
+  document.querySelector("#dashboard-metrics article:first-child span").textContent = activeRole === "provider" ? "Requests in review" : "AI ready decisions";
+  document.querySelector("#dashboard-metrics article:first-child small").textContent = activeRole === "provider" ? "no provider action needed" : "low-risk recommendations";
   document.querySelector("#metric-ready").textContent = ready;
   document.querySelector("#metric-missing").textContent = missing;
   document.querySelector("#metric-sla").textContent = sla;
@@ -182,7 +195,7 @@ function renderQueue() {
     <button class="case-card ${item.id === selectedId ? "active" : ""}" data-case-id="${item.id}">
       <div class="case-title-row">
         <strong>${item.patient}</strong>
-        <span class="status-pill ${statusClass(item.status)}">${item.statusText}</span>
+        <span class="status-pill ${statusClass(item.status)}">${statusTextForRole(item)}</span>
       </div>
       <p>${item.service}</p>
       <div class="case-meta">
@@ -214,13 +227,13 @@ function renderProviderDetail(item) {
       </div>
       <div class="info-card">
         <h3>Provider next step</h3>
-        ${kv("Current status", item.statusText)}
+        ${kv("Current status", statusTextForRole(item))}
         ${kv("SLA", item.sla)}
         ${kv("Action needed", item.status === "missing" ? item.missing.join(", ") : "No provider action needed")}
         ${kv("Notifications", "Status updates are sent when reviewer action is complete")}
       </div>
     </div>
-    ${renderTimeline(item)}
+    ${renderProviderTimeline(item)}
   `;
 }
 
@@ -302,7 +315,7 @@ function renderCaseHeader(item) {
         <span class="eyebrow">${item.id}</span>
         <h2>${item.patient}</h2>
         <p>${item.age} years old | ${item.memberId}</p>
-        <span class="status-pill ${statusClass(item.status)}">${item.statusText}</span>
+        <span class="status-pill ${statusClass(item.status)}">${statusTextForRole(item)}</span>
       </div>
       <div class="patient-avatar" aria-hidden="true">${item.initials}</div>
     </div>
@@ -357,6 +370,25 @@ function renderTimeline(item) {
           <p>${body}</p>
         </div>
       `).join("")}
+    </div>
+  `;
+}
+
+function renderProviderTimeline(item) {
+  const actionText = item.status === "missing"
+    ? `Provider action requested: ${item.missing.join(", ")}`
+    : "Request is with the health plan review team";
+  return `
+    <div class="timeline" style="margin-top:14px">
+      <h3>Status history</h3>
+      <div class="timeline-step">
+        <strong>Submitted</strong>
+        <p>Request received from ${item.provider}</p>
+      </div>
+      <div class="timeline-step">
+        <strong>${statusTextForRole(item)}</strong>
+        <p>${actionText}</p>
+      </div>
     </div>
   `;
 }
