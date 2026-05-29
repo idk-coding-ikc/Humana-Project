@@ -211,9 +211,14 @@ function renderProviderDetail(item) {
         ${kv("Payer", item.payer)}
         ${kv("Diagnosis", item.diagnosis)}
         ${kv("Urgency", item.urgency)}
-        ${kv("AI confidence", `${item.confidence}%`)}
       </div>
-      ${renderAiPanel(item)}
+      <div class="info-card">
+        <h3>Provider next step</h3>
+        ${kv("Current status", item.statusText)}
+        ${kv("SLA", item.sla)}
+        ${kv("Action needed", item.status === "missing" ? item.missing.join(", ") : "No provider action needed")}
+        ${kv("Notifications", "Status updates are sent when reviewer action is complete")}
+      </div>
     </div>
     ${renderTimeline(item)}
   `;
