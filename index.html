@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Humana PA AI Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">HA</div>
+          <div>
+            <strong>Humana PA AI</strong>
+            <span>Prior authorization workspace</span>
+          </div>
+        </div>
+
+        <nav class="role-nav" aria-label="Role views">
+          <button class="role-button active" data-role="provider">Provider</button>
+          <button class="role-button" data-role="reviewer">Clinical Reviewer</button>
+          <button class="role-button" data-role="member">Member</button>
+          <button class="role-button" data-role="ops">Payer Ops</button>
+        </nav>
+
+        <div class="side-panel">
+          <span class="eyebrow">Prototype mode</span>
+          <p>No live integrations are connected. All claims, eligibility, policy, and clinical data are simulated for product validation.</p>
+        </div>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="role-eyebrow">Provider workspace</p>
+            <h1 id="page-title">Submit and track authorizations</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-button" id="reset-demo">Reset demo data</button>
+            <button class="primary-button" id="quick-submit">New request</button>
+          </div>
+        </header>
+
+        <section class="metrics-grid" id="dashboard-metrics" aria-label="Operational metrics">
+          <article>
+            <span>AI ready decisions</span>
+            <strong id="metric-ready">3</strong>
+            <small>low-risk recommendations</small>
+          </article>
+          <article>
+            <span>Missing info found</span>
+            <strong id="metric-missing">2</strong>
+            <small>before reviewer handoff</small>
+          </article>
+          <article>
+            <span>SLA risk</span>
+            <strong id="metric-sla">1</strong>
+            <small>needs attention today</small>
+          </article>
+        </section>
+
+        <section class="workspace-grid" id="dashboard-workspace">
+          <div class="queue-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Live queue</span>
+                <h2 id="queue-title">Authorization requests</h2>
+              </div>
+              <div class="filter-row">
+                <button class="filter-button active" data-filter="all">All</button>
+                <button class="filter-button" data-filter="ready">AI ready</button>
+                <button class="filter-button" data-filter="missing">Missing info</button>
+                <button class="filter-button" data-filter="human">Human review</button>
+              </div>
+            </div>
+            <div id="case-list" class="case-list"></div>
+          </div>
+
+          <div class="detail-panel" id="detail-panel"></div>
+        </section>
+
+        <section class="intake-page hidden" id="intake-page">
+          <form id="request-form">
+            <div class="intake-header">
+              <div>
+                <span class="eyebrow">Provider intake</span>
+                <h2>New prior authorization request</h2>
+              </div>
+              <span class="status-pill status-ready">Blank form</span>
+            </div>
+
+            <div class="intake-section">
+              <h3>Member information</h3>
+              <div class="form-grid">
+                <label>
+                  Member full name
+                  <input name="patient" autocomplete="name" required />
+                </label>
+                <label>
+                  Date of birth
+                  <input name="dob" type="date" required />
+                </label>
+                <label>
+                  Member ID
+                  <input name="memberId" placeholder="HUM-0000-0000" required />
+                </label>
+                <label>
+                  Phone number
+                  <input name="phone" type="tel" placeholder="(555) 555-5555" />
+                </label>
+                <label>
+                  Health plan
+                  <select name="payer" required>
+                    <option value="">Select plan</option>
+                    <option>Humana Medicare Advantage</option>
+                    <option>Humana Medicaid</option>
+                    <option>Humana Commercial</option>
+                    <option>Humana Military</option>
+                  </select>
+                </label>
+                <label>
+                  Plan type
+                  <select name="planType">
+                    <option value="">Select type</option>
+                    <option>HMO</option>
+                    <option>PPO</option>
+                    <option>Dual Eligible Special Needs Plan</option>
+                    <option>Commercial group plan</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="intake-section">
+              <h3>Provider and facility</h3>
+              <div class="form-grid">
+                <label>
+                  Requesting provider
+                  <input name="orderingProvider" required />
+                </label>
+                <label>
+                  Provider NPI
+                  <input name="npi" inputmode="numeric" maxlength="10" placeholder="10-digit NPI" required />
+                </label>
+                <label>
+                  Servicing facility
+                  <input name="facility" />
+                </label>
+                <label>
+                  Tax ID
+                  <input name="taxId" placeholder="XX-XXXXXXX" />
+                </label>
+                <label>
+                  Contact name
+                  <input name="contactName" />
+                </label>
+                <label>
+                  Contact fax
+                  <input name="contactFax" placeholder="(555) 555-5555" />
+                </label>
+              </div>
+            </div>
+
+            <div class="intake-section">
+              <h3>Requested service</h3>
+              <div class="form-grid">
+                <label>
+                  Service category
+                  <select name="category" required>
+                    <option value="">Select category</option>
+                    <option>Advanced imaging</option>
+                    <option>Inpatient admission</option>
+                    <option>Outpatient procedure</option>
+                    <option>Medication or specialty pharmacy</option>
+                    <option>Therapy or durable medical equipment</option>
+                  </select>
+                </label>
+                <label>
+                  Requested service
+                  <input name="service" placeholder="e.g., MRI lumbar spine without contrast" required />
+                </label>
+                <label>
+                  CPT / HCPCS code
+                  <input name="cpt" placeholder="e.g., 72148" />
+                </label>
+                <label>
+                  Place of service
+                  <select name="setting">
+                    <option value="">Select setting</option>
+                    <option>Office</option>
+                    <option>Outpatient hospital</option>
+                    <option>Ambulatory surgical center</option>
+                    <option>Inpatient hospital</option>
+                    <option>Home health</option>
+                  </select>
+                </label>
+                <label>
+                  Requested start date
+                  <input name="startDate" type="date" />
+                </label>
+                <label>
+                  Urgency
+                  <select name="urgency" required>
+                    <option>Standard</option>
+                    <option>Urgent</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="intake-section">
+              <h3>Clinical information</h3>
+              <div class="form-grid">
+                <label>
+                  Primary diagnosis
+                  <input name="diagnosis" required />
+                </label>
+                <label>
+                  ICD-10 code
+                  <input name="icd10" placeholder="e.g., M54.16" />
+                </label>
+                <label class="wide">
+                  Clinical rationale
+                  <textarea name="summary" rows="4" placeholder="Relevant symptoms, exam findings, test results, medical necessity, and provider rationale." required></textarea>
+                </label>
+                <label class="wide">
+                  Prior treatment and conservative therapy
+                  <textarea name="priorTreatment" rows="3" placeholder="Medications tried, therapy dates, prior imaging, failed alternatives, response to treatment, or continuation criteria."></textarea>
+                </label>
+              </div>
+            </div>
+
+            <div class="intake-section">
+              <h3>Supporting documentation</h3>
+              <div class="check-grid">
+                <label><input type="checkbox" name="attachments" value="Clinical notes" /> Clinical notes</label>
+                <label><input type="checkbox" name="attachments" value="Lab or imaging results" /> Lab or imaging results</label>
+                <label><input type="checkbox" name="attachments" value="Medication history" /> Medication history</label>
+                <label><input type="checkbox" name="attachments" value="Therapy notes" /> Therapy notes</label>
+                <label><input type="checkbox" name="attachments" value="Referral or specialist note" /> Referral or specialist note</label>
+                <label><input type="checkbox" name="attachments" value="Discharge summary" /> Discharge summary</label>
+              </div>
+            </div>
+
+            <div class="intake-section">
+              <h3>Attestation</h3>
+              <label class="attestation">
+                <input type="checkbox" name="attestation" required />
+                I attest that the information submitted is accurate and that supporting documentation is available for review.
+              </label>
+            </div>
+
+            <div class="intake-actions">
+              <button class="ghost-button" type="button" id="cancel-intake">Cancel</button>
+              <button class="ghost-button" type="reset">Clear form</button>
+              <button class="primary-button" type="submit">Run AI intake</button>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
