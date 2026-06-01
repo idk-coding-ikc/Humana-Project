@@ -128,6 +128,29 @@ const roleCopy = {
   ops: ["Payer operations", "Operations report", "Operational command center"]
 };
 
+const personaActions = {
+  provider: [
+    ["Start", "Create new request", "Submit member, provider, service, and clinical details."],
+    ["Follow up", "Resolve missing information", "Review focused documentation requests from the plan."],
+    ["Track", "Monitor authorization status", "See review status, SLA timing, and final decisions."]
+  ],
+  reviewer: [
+    ["Prioritize", "Review SLA-risk cases", "Open urgent requests and route exceptions before deadline."],
+    ["Decide", "Validate recommendations", "Compare clinical evidence, policy criteria, and confidence score."],
+    ["Act", "Approve or request info", "Finalize low-risk cases or send precise documentation requests."]
+  ],
+  member: [
+    ["View", "Check request status", "See whether the request is submitted, in review, or approved."],
+    ["Understand", "Read next steps", "Get plain-language guidance on what happens next."],
+    ["Prepare", "Contact provider", "Know when the provider needs more documentation."]
+  ],
+  ops: [
+    ["Monitor", "Track SLA risk", "Find work queues that need staffing or escalation."],
+    ["Measure", "Review throughput", "Compare assisted decisions, reviewer load, and pending work."],
+    ["Govern", "Audit decisions", "Check explainability, oversight, and policy consistency."]
+  ]
+};
+
 let cases = JSON.parse(localStorage.getItem("humana-pa-ai-cases") || "null") || JSON.parse(JSON.stringify(seedCases));
 let selectedId = cases[0].id;
 let activeRole = "provider";
@@ -139,10 +162,15 @@ const detailPanel = document.querySelector("#detail-panel");
 const roleEyebrow = document.querySelector("#role-eyebrow");
 const pageTitle = document.querySelector("#page-title");
 const queueTitle = document.querySelector("#queue-title");
-const dashboardMetrics = document.querySelector("#dashboard-metrics");
+const personaActionsPanel = document.querySelector("#persona-actions");
 const dashboardWorkspace = document.querySelector("#dashboard-workspace");
 const intakePage = document.querySelector("#intake-page");
 const requestForm = document.querySelector("#request-form");
+const chatPanel = document.querySelector("#chat-panel");
+const chatToggle = document.querySelector("#chat-toggle");
+const chatMessages = document.querySelector("#chat-messages");
+const chatForm = document.querySelector("#chat-form");
+const chatInput = document.querySelector("#chat-input");
 
 function saveCases() {
   localStorage.setItem("humana-pa-ai-cases", JSON.stringify(cases));
@@ -178,15 +206,14 @@ function filteredCases() {
   return cases.filter((item) => item.status === activeFilter || (activeFilter === "human" && item.status === "sla"));
 }
 
-function renderMetrics() {
-  const ready = cases.filter((item) => item.status === "ready").length;
-  const missing = cases.filter((item) => item.status === "missing").length;
-  const sla = cases.filter((item) => item.sla.includes("46m") || item.status === "sla").length;
-  document.querySelector("#dashboard-metrics article:first-child span").textContent = activeRole === "provider" ? "Requests in review" : "AI ready decisions";
-  document.querySelector("#dashboard-metrics article:first-child small").textContent = activeRole === "provider" ? "no provider action needed" : "low-risk recommendations";
-  document.querySelector("#metric-ready").textContent = ready;
-  document.querySelector("#metric-missing").textContent = missing;
-  document.querySelector("#metric-sla").textContent = sla;
+function renderPersonaActions() {
+  const actionIds = ["one", "two", "three"];
+  personaActions[activeRole].forEach(([kicker, title, copy], index) => {
+    const id = actionIds[index];
+    document.querySelector(`#action-${id}-kicker`).textContent = kicker;
+    document.querySelector(`#action-${id}-title`).textContent = title;
+    document.querySelector(`#action-${id}-copy`).textContent = copy;
+  });
 }
 
 function renderQueue() {
@@ -442,13 +469,13 @@ function render() {
   queueTitle.textContent = copy[2];
   document.querySelector("#quick-submit").style.display = activeRole === "provider" && activeView === "dashboard" ? "inline-flex" : "none";
   document.querySelector("#reset-demo").style.display = activeView === "dashboard" ? "inline-flex" : "none";
-  dashboardMetrics.classList.toggle("hidden", activeView === "intake");
+  personaActionsPanel.classList.toggle("hidden", activeView === "intake");
   dashboardWorkspace.classList.toggle("hidden", activeView === "intake");
   intakePage.classList.toggle("hidden", activeView !== "intake");
 
   if (activeView === "intake") return;
 
-  renderMetrics();
+  renderPersonaActions();
   renderQueue();
   renderDetail();
 }
@@ -489,6 +516,74 @@ document.querySelector("#reset-demo").addEventListener("click", () => {
   activeView = "dashboard";
   saveCases();
   render();
+});
+
+function addChatMessage(text, sender = "bot") {
+  const message = document.createElement("div");
+  message.className = `chat-message ${sender}`;
+  message.textContent = text;
+  chatMessages.appendChild(message);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function buildChatReply(prompt) {
+  const item = getSelectedCase();
+  const lowerPrompt = prompt.toLowerCase();
+
+  if (lowerPrompt.includes("missing")) {
+    return item.missing.length
+      ? `${item.patient}'s request needs: ${item.missing.join(", ")}. The provider should upload those details before the review can move forward.`
+      : `${item.patient}'s request does not currently show missing provider documentation.`;
+  }
+
+  if (lowerPrompt.includes("explain") || lowerPrompt.includes("summary") || lowerPrompt.includes("request")) {
+    if (activeRole === "reviewer") {
+      return `${item.patient} is requesting ${item.service}. Reviewer view shows the recommendation, supporting evidence, and ${item.confidence}% confidence for human oversight.`;
+    }
+    return `${item.patient} is requesting ${item.service}. Current status is ${statusTextForRole(item)}, with SLA timing of ${item.sla}.`;
+  }
+
+  if (lowerPrompt.includes("next") || lowerPrompt.includes("do")) {
+    if (activeRole === "provider") {
+      return item.status === "missing"
+        ? `Next step: provide ${item.missing.join(", ")} for ${item.patient}.`
+        : `Next step: no provider action is needed for ${item.patient}; continue monitoring the request status.`;
+    }
+    if (activeRole === "reviewer") return `Next step: review the evidence, confirm policy fit, then approve, request information, or route to medical director.`;
+    if (activeRole === "ops") return `Next step: monitor SLA-risk cases and assign reviewers where urgent work is approaching deadline.`;
+    return `Next step: watch the request status and contact the provider if more information is requested.`;
+  }
+
+  return `I can help with the selected case, ${item.patient}. Try asking about next steps, missing information, or a request summary.`;
+}
+
+chatToggle.addEventListener("click", () => {
+  const isOpening = chatPanel.classList.contains("hidden");
+  chatPanel.classList.toggle("hidden", !isOpening);
+  chatToggle.setAttribute("aria-expanded", String(isOpening));
+  if (isOpening) chatInput.focus();
+});
+
+document.querySelector("#chat-close").addEventListener("click", () => {
+  chatPanel.classList.add("hidden");
+  chatToggle.setAttribute("aria-expanded", "false");
+});
+
+document.querySelectorAll("#chat-suggestions button").forEach((button) => {
+  button.addEventListener("click", () => {
+    const prompt = button.textContent;
+    addChatMessage(prompt, "user");
+    addChatMessage(buildChatReply(prompt));
+  });
+});
+
+chatForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const prompt = chatInput.value.trim();
+  if (!prompt) return;
+  addChatMessage(prompt, "user");
+  chatInput.value = "";
+  addChatMessage(buildChatReply(prompt));
 });
 
 requestForm.addEventListener("submit", (event) => {
