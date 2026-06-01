@@ -183,13 +183,7 @@ main {
   padding: 0;
 }
 
-.action-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.action-grid article,
+.actions-panel,
 .queue-panel,
 .detail-panel,
 .intake-page {
@@ -199,9 +193,39 @@ main {
   box-shadow: var(--shadow);
 }
 
-.action-grid article {
+.actions-panel,
+.queue-panel,
+.detail-panel,
+.intake-page {
   padding: 18px;
-  min-height: 116px;
+}
+
+.actions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.actions-header h2 {
+  margin: 3px 0 0;
+  font-size: 24px;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.action-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 128px;
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbef 100%);
+  box-shadow: inset 4px 0 0 var(--teal);
 }
 
 .action-grid span,
@@ -216,9 +240,23 @@ main {
 
 .action-grid strong {
   display: block;
-  font-size: 20px;
+  font-size: 19px;
   margin: 6px 0 2px;
   line-height: 1.2;
+}
+
+.action-card span {
+  color: var(--teal-dark);
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.action-card small {
+  display: block;
+  line-height: 1.45;
+  margin-top: 8px;
 }
 
 .workspace-grid {
@@ -226,12 +264,6 @@ main {
   grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
   gap: 18px;
   align-items: start;
-}
-
-.queue-panel,
-.detail-panel,
-.intake-page {
-  padding: 18px;
 }
 
 .panel-heading,
@@ -553,20 +585,26 @@ textarea {
 
 .chatbot {
   position: fixed;
-  right: 22px;
-  bottom: 22px;
-  z-index: 20;
+  right: 24px;
+  bottom: 24px;
+  z-index: 9999;
+  pointer-events: none;
 }
 
 .chat-toggle {
-  min-width: 68px;
-  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 156px;
+  min-height: 54px;
   border: 0;
   border-radius: 999px;
   background: var(--teal);
   color: #fff;
   font-weight: 900;
+  padding: 0 18px;
   box-shadow: var(--shadow);
+  pointer-events: auto;
 }
 
 .chat-panel {
@@ -579,6 +617,7 @@ textarea {
   border-radius: 8px;
   box-shadow: var(--shadow);
   overflow: hidden;
+  pointer-events: auto;
 }
 
 .chat-header {

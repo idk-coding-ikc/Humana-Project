@@ -163,9 +163,12 @@ const roleEyebrow = document.querySelector("#role-eyebrow");
 const pageTitle = document.querySelector("#page-title");
 const queueTitle = document.querySelector("#queue-title");
 const personaActionsPanel = document.querySelector("#persona-actions");
+const actionList = document.querySelector("#action-list");
 const dashboardWorkspace = document.querySelector("#dashboard-workspace");
 const intakePage = document.querySelector("#intake-page");
 const requestForm = document.querySelector("#request-form");
+const applicationFilters = document.querySelector("#application-filters");
+const toggleApplicationFilters = document.querySelector("#toggle-application-filters");
 const chatPanel = document.querySelector("#chat-panel");
 const chatToggle = document.querySelector("#chat-toggle");
 const chatMessages = document.querySelector("#chat-messages");
@@ -207,13 +210,13 @@ function filteredCases() {
 }
 
 function renderPersonaActions() {
-  const actionIds = ["one", "two", "three"];
-  personaActions[activeRole].forEach(([kicker, title, copy], index) => {
-    const id = actionIds[index];
-    document.querySelector(`#action-${id}-kicker`).textContent = kicker;
-    document.querySelector(`#action-${id}-title`).textContent = title;
-    document.querySelector(`#action-${id}-copy`).textContent = copy;
-  });
+  actionList.innerHTML = personaActions[activeRole].map(([kicker, title, copy]) => `
+    <article class="action-card">
+      <span>${kicker}</span>
+      <strong>${title}</strong>
+      <small>${copy}</small>
+    </article>
+  `).join("");
 }
 
 function renderQueue() {
@@ -497,6 +500,11 @@ document.querySelectorAll(".filter-button").forEach((button) => {
     if (firstVisible) selectedId = firstVisible.id;
     render();
   });
+});
+
+toggleApplicationFilters.addEventListener("click", () => {
+  const isHidden = applicationFilters.classList.toggle("hidden");
+  toggleApplicationFilters.textContent = isHidden ? "Filter applications" : "Hide filters";
 });
 
 document.querySelector("#quick-submit").addEventListener("click", () => {

@@ -42,22 +42,15 @@
           </div>
         </header>
 
-        <section class="action-grid" id="persona-actions" aria-label="Persona actions">
-          <article>
-            <span id="action-one-kicker">Start</span>
-            <strong id="action-one-title">Create new request</strong>
-            <small id="action-one-copy">Submit member, provider, service, and clinical details.</small>
-          </article>
-          <article>
-            <span id="action-two-kicker">Follow up</span>
-            <strong id="action-two-title">Resolve missing information</strong>
-            <small id="action-two-copy">Review focused documentation requests from the plan.</small>
-          </article>
-          <article>
-            <span id="action-three-kicker">Track</span>
-            <strong id="action-three-title">Monitor authorization status</strong>
-            <small id="action-three-copy">See review status, SLA timing, and final decisions.</small>
-          </article>
+        <section class="actions-panel" id="persona-actions" aria-label="Persona actions">
+          <div class="actions-header">
+            <div>
+              <span class="eyebrow">Workspace actions</span>
+              <h2>Actions</h2>
+            </div>
+            <button class="ghost-button" id="toggle-application-filters" type="button">Filter applications</button>
+          </div>
+          <div class="action-grid" id="action-list"></div>
         </section>
 
         <section class="workspace-grid" id="dashboard-workspace">
@@ -67,7 +60,7 @@
                 <span class="eyebrow">Live queue</span>
                 <h2 id="queue-title">Authorization requests</h2>
               </div>
-              <div class="filter-row">
+              <div class="filter-row hidden" id="application-filters">
                 <button class="filter-button active" data-filter="all">All</button>
                 <button class="filter-button" data-filter="ready">AI ready</button>
                 <button class="filter-button" data-filter="missing">Missing info</button>
@@ -262,7 +255,7 @@
     </div>
 
     <section class="chatbot" id="chatbot" aria-label="Humana PA AI assistant">
-      <button class="chat-toggle" id="chat-toggle" aria-expanded="false" aria-controls="chat-panel">Chat</button>
+      <button class="chat-toggle" id="chat-toggle" aria-expanded="false" aria-controls="chat-panel">Ask PA Assistant</button>
       <div class="chat-panel hidden" id="chat-panel">
         <div class="chat-header">
           <div>
@@ -286,6 +279,6 @@
       </div>
     </section>
 
-    <script src="./app.js?v=persona-actions-chatbot-20260601"></script>
+    <script src="./app.js?v=actions-filter-chatbot-20260601"></script>
   </body>
 </html>
