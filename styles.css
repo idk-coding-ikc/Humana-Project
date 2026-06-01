@@ -228,6 +228,15 @@ main {
   box-shadow: inset 4px 0 0 var(--teal);
 }
 
+.action-grid > article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 128px;
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbef 100%);
+  box-shadow: inset 4px 0 0 var(--teal);
+}
+
 .action-grid span,
 .action-grid small,
 .case-meta,
